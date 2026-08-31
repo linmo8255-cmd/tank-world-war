@@ -27,6 +27,13 @@
                     <p>📱 安卓: 触屏移动和射击</p>
                     <p>🎯 击败所有敌人获胜 | ❤️ 生命值耗尽游戏结束</p>
                 </div>
+                <div class="audio-controls">
+                    <h3>音量控制:</h3>
+                    <div class="volume-control">
+                        <label>音效: <span id="sfxVolumeValue">50</span>%</label>
+                        <input type="range" id="sfxVolume" min="0" max="100" value="50">
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -82,6 +89,7 @@
         </div>
     </div>
 
+    <script src="audio.js"></script>
     <script src="game.js"></script>
 </body>
 </html>

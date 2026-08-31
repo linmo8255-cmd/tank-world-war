@@ -1,1 +1,236 @@
-// 音频管理系统\nconst audioManager = {\n    // 背景音乐音量（0-1）\n    musicVolume: 0.3,\n    // 音效音量（0-1）\n    sfxVolume: 0.5,\n    \n    // 背景音乐\n    backgroundMusic: null,\n    isPlayingMusic: false,\n    \n    // 音效缓存\n    sounds: {},\n    \n    // 初始化音频系统\n    init() {\n        this.createAudioContext();\n        this.loadSounds();\n        this.createMenuMusic();\n    },\n    \n    // 创建音频上下文\n    createAudioContext() {\n        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();\n    },\n    \n    // 加载/生成所有音效\n    loadSounds() {\n        // 射击音效\n        this.sounds.shoot = () => this.playShootSound();\n        // 爆炸音效\n        this.sounds.explosion = () => this.playExplosionSound();\n        // 敌人出现音效\n        this.sounds.enemySpawn = () => this.playEnemySpawnSound();\n        // 波次完成音效\n        this.sounds.waveComplete = () => this.playWaveCompleteSound();\n        // 游戏结束音效\n        this.sounds.gameOver = () => this.playGameOverSound();\n        // 胜利音效\n        this.sounds.victory = () => this.playVictorySound();\n        // UI点击音效\n        this.sounds.click = () => this.playClickSound();\n    },\n    \n    // 生成菜单背景音乐\n    createMenuMusic() {\n        if (!this.backgroundMusic) {\n            this.backgroundMusic = this.audioContext.createOscillator();\n        }\n    },\n    \n    // 播放菜单音乐\n    playMenuMusic() {\n        if (this.isPlayingMusic) return;\n        this.isPlayingMusic = true;\n        this.playMenuMelody();\n    },\n    \n    // 菜单音乐旋律\n    playMenuMelody() {\n        const notes = [\n            { freq: 261.63, duration: 0.3 },  // C\n            { freq: 329.63, duration: 0.3 },  // E\n            { freq: 392.00, duration: 0.3 },  // G\n            { freq: 523.25, duration: 0.6 },  // C high\n            { freq: 392.00, duration: 0.3 },  // G\n            { freq: 329.63, duration: 0.3 },  // E\n            { freq: 261.63, duration: 0.6 },  // C\n        ];\n        \n        let currentTime = this.audioContext.currentTime;\n        \n        notes.forEach(note => {\n            this.playTone(note.freq, note.duration, currentTime, 0.2);\n            currentTime += note.duration;\n        });\n        \n        // 循环播放\n        setTimeout(() => {\n            if (this.isPlayingMusic) {\n                this.playMenuMelody();\n            }\n        }, currentTime * 1000 - this.audioContext.currentTime * 1000);\n    },\n    \n    // 停止背景音乐\n    stopMusic() {\n        this.isPlayingMusic = false;\n    },\n    \n    // 射击音效\n    playShootSound() {\n        const now = this.audioContext.currentTime;\n        const osc = this.audioContext.createOscillator();\n        const gain = this.audioContext.createGain();\n        \n        osc.connect(gain);\n        gain.connect(this.audioContext.destination);\n        \n        gain.gain.setValueAtTime(this.sfxVolume, now);\n        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);\n        \n        osc.frequency.setValueAtTime(800, now);\n        osc.frequency.exponentialRampToValueAtTime(200, now + 0.1);\n        \n        osc.start(now);\n        osc.stop(now + 0.1);\n    },\n    \n    // 爆炸音效\n    playExplosionSound() {\n        const now = this.audioContext.currentTime;\n        const osc = this.audioContext.createOscillator();\n        const gain = this.audioContext.createGain();\n        \n        osc.connect(gain);\n        gain.connect(this.audioContext.destination);\n        \n        gain.gain.setValueAtTime(this.sfxVolume * 0.6, now);\n        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);\n        \n        osc.frequency.setValueAtTime(150, now);\n        osc.frequency.exponentialRampToValueAtTime(50, now + 0.3);\n        \n        osc.start(now);\n        osc.stop(now + 0.3);\n        \n        // 添加第二个音调\n        const osc2 = this.audioContext.createOscillator();\n        osc2.connect(gain);\n        osc2.frequency.setValueAtTime(200, now + 0.05);\n        osc2.frequency.exponentialRampToValueAtTime(60, now + 0.25);\n        osc2.start(now + 0.05);\n        osc2.stop(now + 0.25);\n    },\n    \n    // 敌人出现音效\n    playEnemySpawnSound() {\n        const now = this.audioContext.currentTime;\n        const notes = [349.23, 392.00, 440.00];  // F, G, A\n        \n        notes.forEach((freq, index) => {\n            this.playTone(freq, 0.1, now + index * 0.1, this.sfxVolume * 0.4);\n        });\n    },\n    \n    // 波次完成音效\n    playWaveCompleteSound() {\n        const now = this.audioContext.currentTime;\n        const notes = [\n            { freq: 523.25, duration: 0.2 },  // C high\n            { freq: 659.25, duration: 0.2 },  // E high\n            { freq: 783.99, duration: 0.4 },  // G high\n        ];\n        \n        let time = now;\n        notes.forEach(note => {\n            this.playTone(note.freq, note.duration, time, this.sfxVolume * 0.5);\n            time += note.duration;\n        });\n    },\n    \n    // 游戏结束音效\n    playGameOverSound() {\n        const now = this.audioContext.currentTime;\n        const notes = [\n            { freq: 330, duration: 0.2 },\n            { freq: 294, duration: 0.2 },\n            { freq: 262, duration: 0.4 },\n            { freq: 196, duration: 0.4 },\n        ];\n        \n        let time = now;\n        notes.forEach(note => {\n            this.playTone(note.freq, note.duration, time, this.sfxVolume * 0.6);\n            time += note.duration;\n        });\n    },\n    \n    // 胜利音效\n    playVictorySound() {\n        const now = this.audioContext.currentTime;\n        const notes = [\n            { freq: 523.25, duration: 0.1 },  // C high\n            { freq: 523.25, duration: 0.1 },\n            { freq: 659.25, duration: 0.1 },  // E high\n            { freq: 659.25, duration: 0.1 },\n            { freq: 783.99, duration: 0.2 },  // G high\n            { freq: 783.99, duration: 0.2 },\n            { freq: 523.25, duration: 0.4 },  // C high\n        ];\n        \n        let time = now;\n        notes.forEach(note => {\n            this.playTone(note.freq, note.duration, time, this.sfxVolume * 0.5);\n            time += note.duration;\n        });\n    },\n    \n    // UI点击音效\n    playClickSound() {\n        const now = this.audioContext.currentTime;\n        this.playTone(440, 0.1, now, this.sfxVolume * 0.3);\n    },\n    \n    // 通用音调生成器\n    playTone(frequency, duration, startTime, volume) {\n        const osc = this.audioContext.createOscillator();\n        const gain = this.audioContext.createGain();\n        \n        osc.connect(gain);\n        gain.connect(this.audioContext.destination);\n        \n        gain.gain.setValueAtTime(volume, startTime);\n        gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration * 0.8);\n        \n        osc.frequency.setValueAtTime(frequency, startTime);\n        osc.type = 'sine';\n        \n        osc.start(startTime);\n        osc.stop(startTime + duration);\n    },\n    \n    // 调整音量\n    setMusicVolume(volume) {\n        this.musicVolume = Math.max(0, Math.min(1, volume));\n    },\n    \n    setEffectVolume(volume) {\n        this.sfxVolume = Math.max(0, Math.min(1, volume));\n    }\n};\n\n// 页面加载时初始化\nif (document.readyState === 'loading') {\n    document.addEventListener('DOMContentLoaded', () => {\n        audioManager.init();\n    });\n} else {\n    audioManager.init();\n}\n"
+// 音频管理系统
+const audioManager = {
+    // 背景音乐音量（0-1）
+    musicVolume: 0.3,
+    // 音效音量（0-1）
+    sfxVolume: 0.5,
+    
+    // 背景音乐
+    backgroundMusic: null,
+    isPlayingMusic: false,
+    
+    // 音效缓存
+    sounds: {},
+    
+    // 初始化音频系统
+    init() {
+        this.createAudioContext();
+        this.loadSounds();
+    },
+    
+    // 创建音频上下文
+    createAudioContext() {
+        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    },
+    
+    // 加载/生成所有音效
+    loadSounds() {
+        // 射击音效
+        this.sounds.shoot = () => this.playShootSound();
+        // 爆炸音效
+        this.sounds.explosion = () => this.playExplosionSound();
+        // 敌人出现音效
+        this.sounds.enemySpawn = () => this.playEnemySpawnSound();
+        // 波次完成音效
+        this.sounds.waveComplete = () => this.playWaveCompleteSound();
+        // 游戏结束音效
+        this.sounds.gameOver = () => this.playGameOverSound();
+        // 胜利音效
+        this.sounds.victory = () => this.playVictorySound();
+        // UI点击音效
+        this.sounds.click = () => this.playClickSound();
+    },
+    
+    // 播放菜单音乐
+    playMenuMusic() {
+        if (this.isPlayingMusic) return;
+        this.isPlayingMusic = true;
+        this.playMenuMelody();
+    },
+    
+    // 菜单音乐旋律
+    playMenuMelody() {
+        const notes = [
+            { freq: 261.63, duration: 0.3 },  // C
+            { freq: 329.63, duration: 0.3 },  // E
+            { freq: 392.00, duration: 0.3 },  // G
+            { freq: 523.25, duration: 0.6 },  // C high
+            { freq: 392.00, duration: 0.3 },  // G
+            { freq: 329.63, duration: 0.3 },  // E
+            { freq: 261.63, duration: 0.6 },  // C
+        ];
+        
+        let currentTime = this.audioContext.currentTime;
+        const startTime = currentTime;
+        
+        notes.forEach(note => {
+            this.playTone(note.freq, note.duration, currentTime, 0.2);
+            currentTime += note.duration;
+        });
+        
+        const totalDuration = currentTime - startTime;
+        
+        // 循环播放
+        setTimeout(() => {
+            if (this.isPlayingMusic) {
+                this.playMenuMelody();
+            }
+        }, totalDuration * 1000);
+    },
+    
+    // 停止背景音乐
+    stopMusic() {
+        this.isPlayingMusic = false;
+    },
+    
+    // 射击音效
+    playShootSound() {
+        const now = this.audioContext.currentTime;
+        const osc = this.audioContext.createOscillator();
+        const gain = this.audioContext.createGain();
+        
+        osc.connect(gain);
+        gain.connect(this.audioContext.destination);
+        
+        gain.gain.setValueAtTime(this.sfxVolume, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+        
+        osc.frequency.setValueAtTime(800, now);
+        osc.frequency.exponentialRampToValueAtTime(200, now + 0.1);
+        
+        osc.start(now);
+        osc.stop(now + 0.1);
+    },
+    
+    // 爆炸音效
+    playExplosionSound() {
+        const now = this.audioContext.currentTime;
+        const osc = this.audioContext.createOscillator();
+        const gain = this.audioContext.createGain();
+        
+        osc.connect(gain);
+        gain.connect(this.audioContext.destination);
+        
+        gain.gain.setValueAtTime(this.sfxVolume * 0.6, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        
+        osc.frequency.setValueAtTime(150, now);
+        osc.frequency.exponentialRampToValueAtTime(50, now + 0.3);
+        
+        osc.start(now);
+        osc.stop(now + 0.3);
+        
+        // 添加第二个音调
+        const osc2 = this.audioContext.createOscillator();
+        osc2.connect(gain);
+        osc2.frequency.setValueAtTime(200, now + 0.05);
+        osc2.frequency.exponentialRampToValueAtTime(60, now + 0.25);
+        osc2.start(now + 0.05);
+        osc2.stop(now + 0.25);
+    },
+    
+    // 敌人出现音效
+    playEnemySpawnSound() {
+        const now = this.audioContext.currentTime;
+        const notes = [349.23, 392.00, 440.00];  // F, G, A
+        
+        notes.forEach((freq, index) => {
+            this.playTone(freq, 0.1, now + index * 0.1, this.sfxVolume * 0.4);
+        });
+    },
+    
+    // 波次完成音效
+    playWaveCompleteSound() {
+        const now = this.audioContext.currentTime;
+        const notes = [
+            { freq: 523.25, duration: 0.2 },  // C high
+            { freq: 659.25, duration: 0.2 },  // E high
+            { freq: 783.99, duration: 0.4 },  // G high
+        ];
+        
+        let time = now;
+        notes.forEach(note => {
+            this.playTone(note.freq, note.duration, time, this.sfxVolume * 0.5);
+            time += note.duration;
+        });
+    },
+    
+    // 游戏结束音效
+    playGameOverSound() {
+        const now = this.audioContext.currentTime;
+        const notes = [
+            { freq: 330, duration: 0.2 },
+            { freq: 294, duration: 0.2 },
+            { freq: 262, duration: 0.4 },
+            { freq: 196, duration: 0.4 },
+        ];
+        
+        let time = now;
+        notes.forEach(note => {
+            this.playTone(note.freq, note.duration, time, this.sfxVolume * 0.6);
+            time += note.duration;
+        });
+    },
+    
+    // 胜利音效
+    playVictorySound() {
+        const now = this.audioContext.currentTime;
+        const notes = [
+            { freq: 523.25, duration: 0.1 },  // C high
+            { freq: 523.25, duration: 0.1 },
+            { freq: 659.25, duration: 0.1 },  // E high
+            { freq: 659.25, duration: 0.1 },
+            { freq: 783.99, duration: 0.2 },  // G high
+            { freq: 783.99, duration: 0.2 },
+            { freq: 523.25, duration: 0.4 },  // C high
+        ];
+        
+        let time = now;
+        notes.forEach(note => {
+            this.playTone(note.freq, note.duration, time, this.sfxVolume * 0.5);
+            time += note.duration;
+        });
+    },
+    
+    // UI点击音效
+    playClickSound() {
+        const now = this.audioContext.currentTime;
+        this.playTone(440, 0.1, now, this.sfxVolume * 0.3);
+    },
+    
+    // 通用音调生成器
+    playTone(frequency, duration, startTime, volume) {
+        const osc = this.audioContext.createOscillator();
+        const gain = this.audioContext.createGain();
+        
+        osc.connect(gain);
+        gain.connect(this.audioContext.destination);
+        
+        gain.gain.setValueAtTime(volume, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration * 0.8);
+        
+        osc.frequency.setValueAtTime(frequency, startTime);
+        osc.type = 'sine';
+        
+        osc.start(startTime);
+        osc.stop(startTime + duration);
+    },
+    
+    // 调整音量
+    setMusicVolume(volume) {
+        this.musicVolume = Math.max(0, Math.min(1, volume));
+    },
+    
+    setEffectVolume(volume) {
+        this.sfxVolume = Math.max(0, Math.min(1, volume));
+    }
+};
+
+// 页面加载时初始化
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        audioManager.init();
+    });
+} else {
+    audioManager.init();
+}

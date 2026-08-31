@@ -1,0 +1,383 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    overflow: hidden;
+}
+
+.container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 菜单样式 */
+.menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.menu-content {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 40px;
+    border-radius: 15px;
+    text-align: center;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.menu-content h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.menu-content p {
+    font-size: 1.1em;
+    margin-bottom: 30px;
+    opacity: 0.9;
+}
+
+.menu-content h3 {
+    font-size: 1.3em;
+    margin: 20px 0 15px 0;
+}
+
+/* 难度选择 */
+.difficulty-select {
+    margin: 30px 0;
+}
+
+.difficulty-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid #fff;
+    color: #fff;
+    padding: 10px 20px;
+    margin: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: all 0.3s ease;
+}
+
+.difficulty-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.difficulty-btn.selected {
+    background: #4CAF50;
+    border-color: #4CAF50;
+}
+
+/* 按钮样式 */
+.start-btn {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    border: none;
+    color: white;
+    padding: 15px 40px;
+    font-size: 1.2em;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+}
+
+.start-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.6);
+}
+
+.start-btn:active {
+    transform: translateY(-1px);
+}
+
+/* 游戏说明 */
+.instructions {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 20px;
+    text-align: left;
+}
+
+.instructions p {
+    margin: 8px 0;
+    font-size: 0.95em;
+}
+
+/* 游戏容器 */
+.game-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: #1a1a1a;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+}
+
+/* 游戏UI */
+.game-ui {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 100;
+}
+
+.ui-left,
+.ui-right {
+    position: absolute;
+    pointer-events: auto;
+}
+
+.ui-left {
+    top: 20px;
+    left: 20px;
+}
+
+.ui-right {
+    top: 20px;
+    right: 20px;
+}
+
+.stats {
+    background: rgba(0, 0, 0, 0.6);
+    padding: 15px;
+    border-radius: 5px;
+    min-width: 200px;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 8px 0;
+    font-size: 1.1em;
+}
+
+.health-bar {
+    width: 100px;
+    height: 20px;
+    background: #333;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-left: 10px;
+}
+
+.health-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4CAF50, #45a049);
+    width: 100%;
+    transition: width 0.2s ease;
+}
+
+.control-btn {
+    background: rgba(76, 175, 80, 0.8);
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: all 0.3s ease;
+    pointer-events: auto;
+}
+
+.control-btn:hover {
+    background: #4CAF50;
+    transform: scale(1.05);
+}
+
+/* 游戏结束统计 */
+.game-stats {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 20px;
+    border-radius: 5px;
+    margin: 20px 0;
+    font-size: 1.2em;
+}
+
+.game-stats p {
+    margin: 10px 0;
+}
+
+#gameOverTitle.victory {
+    color: #4CAF50;
+    font-size: 3em;
+}
+
+#gameOverTitle.defeat {
+    color: #f44336;
+    font-size: 3em;
+}
+
+/* 响应式设计 - 手机适配 */
+@media (max-width: 768px) {
+    .menu-content {
+        padding: 30px;
+        width: 95%;
+    }
+
+    .menu-content h1 {
+        font-size: 2em;
+    }
+
+    .menu-content p {
+        font-size: 0.95em;
+    }
+
+    .difficulty-btn {
+        padding: 8px 15px;
+        margin: 5px 2px;
+        font-size: 0.9em;
+    }
+
+    .start-btn {
+        padding: 12px 30px;
+        font-size: 1em;
+    }
+
+    .instructions {
+        font-size: 0.85em;
+    }
+
+    .instructions p {
+        margin: 6px 0;
+    }
+
+    .ui-left,
+    .ui-right {
+        top: 10px;
+    }
+
+    .ui-left {
+        left: 10px;
+    }
+
+    .ui-right {
+        right: 10px;
+    }
+
+    .stats {
+        padding: 10px;
+        min-width: 160px;
+        font-size: 0.9em;
+    }
+
+    .stat-item {
+        margin: 6px 0;
+    }
+
+    .health-bar {
+        width: 80px;
+        height: 16px;
+    }
+
+    .control-btn {
+        padding: 8px 15px;
+        font-size: 0.9em;
+    }
+
+    .game-stats {
+        font-size: 1em;
+    }
+}
+
+@media (max-width: 480px) {
+    .menu-content {
+        padding: 20px;
+    }
+
+    .menu-content h1 {
+        font-size: 1.6em;
+    }
+
+    .difficulty-btn {
+        padding: 8px 12px;
+        margin: 3px 2px;
+        font-size: 0.8em;
+    }
+
+    .start-btn {
+        padding: 10px 20px;
+        font-size: 0.95em;
+    }
+
+    .instructions {
+        font-size: 0.75em;
+    }
+
+    .instructions p {
+        margin: 4px 0;
+    }
+
+    .stats {
+        min-width: 140px;
+        font-size: 0.8em;
+    }
+
+    .health-bar {
+        width: 70px;
+        height: 14px;
+    }
+}
+
+/* 禁用文本选择 */
+.game-container {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}

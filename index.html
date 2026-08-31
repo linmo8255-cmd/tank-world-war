@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="坦克世界大战 - 一个刺激的浏览器坦克射击游戏">
+    <title>坦克世界大战</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 游戏菜单 -->
+        <div id="gameMenu" class="menu">
+            <div class="menu-content">
+                <h1>坦克世界大战</h1>
+                <p>一场激烈的坦克战争即将开始</p>
+                <div class="difficulty-select">
+                    <h3>选择难度:</h3>
+                    <button class="difficulty-btn" data-difficulty="easy">简单</button>
+                    <button class="difficulty-btn" data-difficulty="normal">普通</button>
+                    <button class="difficulty-btn" data-difficulty="hard">困难</button>
+                </div>
+                <button id="startBtn" class="start-btn">开始游戏</button>
+                <div class="instructions">
+                    <h3>游戏说明:</h3>
+                    <p>🖱️ 鼠标移动控制坦克方向 | 点击射击</p>
+                    <p>📱 安卓: 触屏移动和射击</p>
+                    <p>🎯 击败所有敌人获胜 | ❤️ 生命值耗尽游戏结束</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 游戏画布 -->
+        <div id="gameContainer" class="game-container" style="display: none;">
+            <canvas id="gameCanvas"></canvas>
+            <div class="game-ui">
+                <div class="ui-left">
+                    <div class="stats">
+                        <div class="stat-item">
+                            <span>血量:</span>
+                            <div class="health-bar">
+                                <div id="playerHealth" class="health-fill"></div>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <span>杀敌:</span>
+                            <span id="killCount">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>敌人:</span>
+                            <span id="enemyCount">0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-right">
+                    <button id="pauseBtn" class="control-btn">暂停</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 游戏结束界面 -->
+        <div id="gameOver" class="menu" style="display: none;">
+            <div class="menu-content">
+                <h1 id="gameOverTitle">游戏结束</h1>
+                <div class="game-stats">
+                    <p>最终杀敌数: <span id="finalKills">0</span></p>
+                    <p>波数: <span id="finalWave">0</span></p>
+                    <p>用时: <span id="finalTime">0</span>秒</p>
+                </div>
+                <button id="retryBtn" class="start-btn">重新开始</button>
+                <button id="menuBtn" class="start-btn">返回菜单</button>
+            </div>
+        </div>
+
+        <!-- 暂停菜单 -->
+        <div id="pauseMenu" class="menu" style="display: none;">
+            <div class="menu-content">
+                <h1>游戏暂停</h1>
+                <button id="resumeBtn" class="start-btn">继续游戏</button>
+                <button id="pauseMenuBtn" class="start-btn">返回菜单</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>

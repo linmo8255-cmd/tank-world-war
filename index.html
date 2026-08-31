@@ -3,93 +3,674 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="坦克世界大战 - 一个刺激的浏览器坦克射击游戏">
     <title>坦克世界大战</title>
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .mode-selection {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .mode-btn {
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .mode-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .mode-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        #gameCanvas {
+            display: block;
+            border: 3px solid #333;
+            background: #f0f0f0;
+            margin: 20px auto;
+            border-radius: 8px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .game-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .info-box h3 {
+            color: #667eea;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .info-box p {
+            color: #666;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .controls {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .controls h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .control-item {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #666;
+            border: 1px solid #e0e0e0;
+        }
+
+        .status-bar {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .reset-btn {
+            padding: 10px 20px;
+            background: #764ba2;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 15px;
+            transition: background 0.3s ease;
+        }
+
+        .reset-btn:hover {
+            background: #664ba2;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <!-- 游戏菜单 -->
-        <div id="gameMenu" class="menu">
-            <div class="menu-content">
-                <h1>坦克世界大战</h1>
-                <p>一场激烈的坦克战争即将开始</p>
-                <div class="difficulty-select">
-                    <h3>选择难度:</h3>
-                    <button class="difficulty-btn" data-difficulty="easy">简单</button>
-                    <button class="difficulty-btn" data-difficulty="normal">普通</button>
-                    <button class="difficulty-btn" data-difficulty="hard">困难</button>
+        <h1>🎮 坦克世界大战</h1>
+        
+        <div class="mode-selection">
+            <button class="mode-btn active" onclick="startGame(2)">👥 双人对战</button>
+            <button class="mode-btn" onclick="startGame(4)">👨‍👩‍👧‍👦 四人对战</button>
+        </div>
+
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+        <div class="status-bar">
+            <span id="gameStatus">加载中...</span>
+        </div>
+
+        <div class="game-info">
+            <div class="info-box">
+                <h3>🎯 游戏目标</h3>
+                <p>消灭所有对手坦克，最后存活的坦克即为赢家！</p>
+            </div>
+            <div class="info-box">
+                <h3>⚡ 特殊机制</h3>
+                <p>销毁敌方坦克可获得积分，收集道具增强能力！</p>
+            </div>
+            <div class="info-box">
+                <h3>🏆 胜利条件</h3>
+                <p>消灭所有对手或存活时间最长即可获胜！</p>
+            </div>
+        </div>
+
+        <div class="controls">
+            <h3>📖 操作说明</h3>
+            <div class="control-grid">
+                <div class="control-item">
+                    <strong>玩家1（双人模式）</strong><br>
+                    W/A/S/D - 移动<br>
+                    空格 - 射击
                 </div>
-                <button id="startBtn" class="start-btn">开始游戏</button>
-                <div class="instructions">
-                    <h3>游戏说明:</h3>
-                    <p>🖱️ 鼠标移动控制坦克方向 | 点击射击</p>
-                    <p>📱 安卓: 触屏移动和射击</p>
-                    <p>🎯 击败所有敌人获胜 | ❤️ 生命值耗尽游戏结束</p>
+                <div class="control-item">
+                    <strong>玩家2（双人模式）</strong><br>
+                    ↑/←/↓/→ - 移动<br>
+                    回车 - 射击
                 </div>
-                <div class="audio-controls">
-                    <h3>音量控制:</h3>
-                    <div class="volume-control">
-                        <label>音效: <span id="sfxVolumeValue">50</span>%</label>
-                        <input type="range" id="sfxVolume" min="0" max="100" value="50">
-                    </div>
+                <div class="control-item">
+                    <strong>玩家3（四人模式）</strong><br>
+                    W/A/S/D - 移动<br>
+                    空格 - 射击
+                </div>
+                <div class="control-item">
+                    <strong>玩家4（四人模式）</strong><br>
+                    ↑/←/↓/→ - 移动<br>
+                    回车 - 射击
                 </div>
             </div>
         </div>
 
-        <!-- 游戏画布 -->
-        <div id="gameContainer" class="game-container" style="display: none;">
-            <canvas id="gameCanvas"></canvas>
-            <div class="game-ui">
-                <div class="ui-left">
-                    <div class="stats">
-                        <div class="stat-item">
-                            <span>血量:</span>
-                            <div class="health-bar">
-                                <div id="playerHealth" class="health-fill"></div>
-                            </div>
-                        </div>
-                        <div class="stat-item">
-                            <span>杀敌:</span>
-                            <span id="killCount">0</span>
-                        </div>
-                        <div class="stat-item">
-                            <span>敌人:</span>
-                            <span id="enemyCount">0</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="ui-right">
-                    <button id="pauseBtn" class="control-btn">暂停</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- 游戏结束界面 -->
-        <div id="gameOver" class="menu" style="display: none;">
-            <div class="menu-content">
-                <h1 id="gameOverTitle">游戏结束</h1>
-                <div class="game-stats">
-                    <p>最终杀敌数: <span id="finalKills">0</span></p>
-                    <p>波数: <span id="finalWave">0</span></p>
-                    <p>用时: <span id="finalTime">0</span>秒</p>
-                </div>
-                <button id="retryBtn" class="start-btn">重新开始</button>
-                <button id="menuBtn" class="start-btn">返回菜单</button>
-            </div>
-        </div>
-
-        <!-- 暂停菜单 -->
-        <div id="pauseMenu" class="menu" style="display: none;">
-            <div class="menu-content">
-                <h1>游戏暂停</h1>
-                <button id="resumeBtn" class="start-btn">继续游戏</button>
-                <button id="pauseMenuBtn" class="start-btn">返回菜单</button>
-            </div>
-        </div>
+        <button class="reset-btn" onclick="resetGame()">🔄 重新开始</button>
     </div>
 
-    <script src="audio.js"></script>
-    <script src="game.js"></script>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const gameStatus = document.getElementById('gameStatus');
+
+        let gameMode = 2; // 默认双��模式
+        let gameRunning = false;
+        let gameOver = false;
+        let winner = null;
+
+        // 坦克对象类
+        class Tank {
+            constructor(x, y, playerNum, color) {
+                this.x = x;
+                this.y = y;
+                this.playerNum = playerNum;
+                this.color = color;
+                this.width = 30;
+                this.height = 30;
+                this.speed = 3;
+                this.angle = 0;
+                this.health = 100;
+                this.maxHealth = 100;
+                this.ammo = 50;
+                this.maxAmmo = 50;
+                this.score = 0;
+                this.alive = true;
+            }
+
+            draw() {
+                if (!this.alive) return;
+
+                ctx.save();
+                ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
+                ctx.rotate(this.angle);
+
+                // 坦克车身
+                ctx.fillStyle = this.color;
+                ctx.fillRect(-this.width / 2, -this.height / 2, this.width, this.height);
+
+                // 坦克炮塔
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(0, 0, 8, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 坦克炮管
+                ctx.strokeStyle = this.color;
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(15, 0);
+                ctx.stroke();
+
+                ctx.restore();
+
+                // 绘制血条
+                this.drawHealthBar();
+            }
+
+            drawHealthBar() {
+                const barWidth = 30;
+                const barHeight = 4;
+                const x = this.x + (this.width - barWidth) / 2;
+                const y = this.y - 10;
+
+                // 背景
+                ctx.fillStyle = '#ccc';
+                ctx.fillRect(x, y, barWidth, barHeight);
+
+                // 血量
+                const healthPercent = this.health / this.maxHealth;
+                ctx.fillStyle = healthPercent > 0.5 ? '#00ff00' : healthPercent > 0.25 ? '#ffff00' : '#ff0000';
+                ctx.fillRect(x, y, barWidth * healthPercent, barHeight);
+            }
+
+            update(keys) {
+                if (!this.alive) return;
+
+                // 移动逻辑（根据玩家编号）
+                this.handleMovement(keys);
+                
+                // 边界检测
+                this.x = Math.max(0, Math.min(this.x, canvas.width - this.width));
+                this.y = Math.max(0, Math.min(this.y, canvas.height - this.height));
+            }
+
+            handleMovement(keys) {
+                const moveKeys = this.getMovementKeys();
+                let moved = false;
+
+                // 前后移动
+                if (keys[moveKeys.forward]) {
+                    this.x += Math.cos(this.angle) * this.speed;
+                    this.y += Math.sin(this.angle) * this.speed;
+                    moved = true;
+                }
+                if (keys[moveKeys.backward]) {
+                    this.x -= Math.cos(this.angle) * this.speed;
+                    this.y -= Math.sin(this.angle) * this.speed;
+                    moved = true;
+                }
+
+                // 旋转
+                if (keys[moveKeys.left]) {
+                    this.angle -= 0.05;
+                }
+                if (keys[moveKeys.right]) {
+                    this.angle += 0.05;
+                }
+            }
+
+            getMovementKeys() {
+                const keyMaps = {
+                    1: { forward: 'w', backward: 's', left: 'a', right: 'd' },
+                    2: { forward: 'ArrowUp', backward: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' },
+                    3: { forward: 'w', backward: 's', left: 'a', right: 'd' },
+                    4: { forward: 'ArrowUp', backward: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' }
+                };
+                return keyMaps[this.playerNum] || keyMaps[1];
+            }
+
+            shoot() {
+                if (this.ammo > 0) {
+                    this.ammo--;
+                    const bulletX = this.x + this.width / 2 + Math.cos(this.angle) * 20;
+                    const bulletY = this.y + this.height / 2 + Math.sin(this.angle) * 20;
+                    return new Bullet(bulletX, bulletY, this.angle, this.playerNum);
+                }
+                return null;
+            }
+
+            takeDamage(damage) {
+                this.health -= damage;
+                if (this.health <= 0) {
+                    this.alive = false;
+                }
+            }
+
+            heal(amount) {
+                this.health = Math.min(this.health + amount, this.maxHealth);
+            }
+
+            addAmmo(amount) {
+                this.ammo = Math.min(this.ammo + amount, this.maxAmmo);
+            }
+        }
+
+        // 子弹类
+        class Bullet {
+            constructor(x, y, angle, playerNum) {
+                this.x = x;
+                this.y = y;
+                this.angle = angle;
+                this.playerNum = playerNum;
+                this.speed = 6;
+                this.radius = 3;
+                this.alive = true;
+                this.damage = 10;
+            }
+
+            update() {
+                this.x += Math.cos(this.angle) * this.speed;
+                this.y += Math.sin(this.angle) * this.speed;
+
+                // 边界检测
+                if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+                    this.alive = false;
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = '#ffff00';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // 道具类
+        class Powerup {
+            constructor(x, y, type) {
+                this.x = x;
+                this.y = y;
+                this.type = type; // 'health' 或 'ammo'
+                this.width = 15;
+                this.height = 15;
+                this.alive = true;
+            }
+
+            draw() {
+                ctx.fillStyle = this.type === 'health' ? '#00ff00' : '#0000ff';
+                ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
+                
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 12px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.type === 'health' ? '❤' : '🔫', this.x, this.y);
+            }
+        }
+
+        // 游戏变量
+        let tanks = [];
+        let bullets = [];
+        let powerups = [];
+        let keys = {};
+
+        // 键盘事件
+        window.addEventListener('keydown', (e) => {
+            const key = e.key.toLowerCase();
+            if (key === 'arrowup' || key === 'arrowdown' || key === 'arrowleft' || key === 'arrowright') {
+                keys['Arrow' + key.slice(5).charAt(0).toUpperCase() + key.slice(6)] = true;
+            } else {
+                keys[key] = true;
+            }
+
+            // 射击
+            if (key === ' ') {
+                e.preventDefault();
+                shootTank(1);
+            }
+            if (key === 'enter') {
+                e.preventDefault();
+                shootTank(gameMode === 2 ? 2 : 4);
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            const key = e.key.toLowerCase();
+            if (key === 'arrowup' || key === 'arrowdown' || key === 'arrowleft' || key === 'arrowright') {
+                keys['Arrow' + key.slice(5).charAt(0).toUpperCase() + key.slice(6)] = false;
+            } else {
+                keys[key] = false;
+            }
+        });
+
+        function shootTank(playerNum) {
+            if (gameOver) return;
+            for (let tank of tanks) {
+                if (tank.playerNum === playerNum && tank.alive) {
+                    const bullet = tank.shoot();
+                    if (bullet) {
+                        bullets.push(bullet);
+                    }
+                }
+            }
+        }
+
+        function startGame(mode) {
+            gameMode = mode;
+            resetGame();
+
+            // 更新按钮状态
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        function resetGame() {
+            tanks = [];
+            bullets = [];
+            powerups = [];
+            keys = {};
+            gameOver = false;
+            winner = null;
+            gameRunning = true;
+
+            // 初始化坦克
+            const colors = ['#ff0000', '#0000ff', '#00ff00', '#ffff00'];
+            const startPositions = [
+                { x: 50, y: 50 },
+                { x: canvas.width - 80, y: 50 },
+                { x: 50, y: canvas.height - 80 },
+                { x: canvas.width - 80, y: canvas.height - 80 }
+            ];
+
+            for (let i = 0; i < gameMode; i++) {
+                tanks.push(new Tank(startPositions[i].x, startPositions[i].y, i + 1, colors[i]));
+            }
+
+            gameStatus.textContent = `游戏开始！${gameMode}人对战模式`;
+            gameLoop();
+        }
+
+        function checkCollisions() {
+            // 子弹与坦克碰撞
+            for (let i = bullets.length - 1; i >= 0; i--) {
+                const bullet = bullets[i];
+                for (let tank of tanks) {
+                    if (!tank.alive || bullet.playerNum === tank.playerNum) continue;
+
+                    const dx = bullet.x - (tank.x + tank.width / 2);
+                    const dy = bullet.y - (tank.y + tank.height / 2);
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < tank.width / 2 + bullet.radius) {
+                        tank.takeDamage(bullet.damage);
+                        bullet.alive = false;
+
+                        // 坦克死亡
+                        if (!tank.alive) {
+                            // 找到射手并加分
+                            for (let t of tanks) {
+                                if (t.playerNum === bullet.playerNum) {
+                                    t.score += 10;
+                                }
+                            }
+                            // 生成道具
+                            if (Math.random() > 0.5) {
+                                powerups.push(new Powerup(tank.x, tank.y, Math.random() > 0.5 ? 'health' : 'ammo'));
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 坦克与道具碰撞
+            for (let i = powerups.length - 1; i >= 0; i--) {
+                const powerup = powerups[i];
+                for (let tank of tanks) {
+                    if (!tank.alive) continue;
+
+                    const dx = powerup.x - (tank.x + tank.width / 2);
+                    const dy = powerup.y - (tank.y + tank.height / 2);
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < tank.width / 2 + powerup.width / 2) {
+                        if (powerup.type === 'health') {
+                            tank.heal(30);
+                        } else {
+                            tank.addAmmo(15);
+                        }
+                        powerups.splice(i, 1);
+                    }
+                }
+            }
+        }
+
+        function checkGameOver() {
+            const aliveTanks = tanks.filter(t => t.alive);
+            
+            if (aliveTanks.length <= 1) {
+                gameRunning = false;
+                gameOver = true;
+                
+                if (aliveTanks.length === 1) {
+                    winner = aliveTanks[0];
+                    gameStatus.textContent = `🎉 玩家${winner.playerNum}获胜！得分：${winner.score}`;
+                } else {
+                    gameStatus.textContent = '游戏结束！平局';
+                }
+                
+                return true;
+            }
+            return false;
+        }
+
+        function update() {
+            // 更新坦克
+            for (let tank of tanks) {
+                tank.update(keys);
+            }
+
+            // 更新子弹
+            for (let i = bullets.length - 1; i >= 0; i--) {
+                bullets[i].update();
+                if (!bullets[i].alive) {
+                    bullets.splice(i, 1);
+                }
+            }
+
+            // 检查碰撞
+            checkCollisions();
+
+            // 检查游戏结束
+            checkGameOver();
+        }
+
+        function draw() {
+            // 清空画布
+            ctx.fillStyle = '#e8e8e8';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 绘制网格
+            ctx.strokeStyle = '#ddd';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < canvas.width; i += 50) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, canvas.height);
+                ctx.stroke();
+            }
+            for (let i = 0; i < canvas.height; i += 50) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(canvas.width, i);
+                ctx.stroke();
+            }
+
+            // 绘制坦克
+            for (let tank of tanks) {
+                tank.draw();
+            }
+
+            // 绘制子弹
+            for (let bullet of bullets) {
+                bullet.draw();
+            }
+
+            // 绘制道具
+            for (let powerup of powerups) {
+                powerup.draw();
+            }
+
+            // 绘制状态信息
+            drawStats();
+        }
+
+        function drawStats() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(10, 10, 250, 20 + tanks.length * 25);
+
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('玩家状态', 15, 28);
+
+            tanks.forEach((tank, index) => {
+                const y = 45 + index * 25;
+                ctx.fillStyle = tank.color;
+                ctx.fillRect(15, y - 10, 10, 10);
+
+                ctx.fillStyle = 'white';
+                ctx.font = '12px Arial';
+                const status = tank.alive ? `HP:${tank.health} 弹药:${tank.ammo} 分数:${tank.score}` : '已阵亡';
+                ctx.fillText(`P${tank.playerNum}: ${status}`, 30, y);
+            });
+        }
+
+        function gameLoop() {
+            if (gameRunning) {
+                update();
+                draw();
+                requestAnimationFrame(gameLoop);
+            } else if (!gameOver) {
+                draw();
+            }
+        }
+
+        // 初始化
+        gameStatus.textContent = '请选择游戏模式开始！';
+    </script>
 </body>
 </html>
